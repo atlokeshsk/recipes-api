@@ -37,8 +37,13 @@ func NewRecipeHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, recipe)
 }
 
+func FetchAllRecipesHandlers(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, recipes)
+}
+
 func main() {
 	router := gin.Default()
 	router.POST("/recipes", NewRecipeHandler)
+	router.GET("/recipes", FetchAllRecipesHandlers)
 	router.Run()
 }
