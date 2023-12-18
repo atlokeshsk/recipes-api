@@ -7,6 +7,7 @@ import (
 
 	"github.com/atlokeshsk/recipes-api/handlers"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -16,6 +17,7 @@ import (
 var ctx context.Context
 var client *mongo.Client
 var recipesHandler *handlers.RecipesHandlers
+var redisClient *redis.Client
 
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -30,7 +32,17 @@ func init() {
 	log.Println("Mongodb Connected Sucessfully")
 	recipeCollection := client.Database(os.Getenv("MONGODB_DATABASE")).Collection("recipes")
 
-	recipesHandler = handlers.NewRecipesHandlers(recipeCollection, ctx)
+	// redis client initalization
+	redisClient = redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+
+	status := redisClient.Ping(ctx)
+	log.Println(status.Result())
+
+	recipesHandler = handlers.NewRecipesHandlers(recipeCollection, ctx, redisClient)
 }
 
 func main() {
